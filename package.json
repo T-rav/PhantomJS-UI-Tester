@@ -9,6 +9,7 @@
   "dependencies": {
     "webpage": "0.3.0",
 	"phantom": "0.7.2",
-	"node-phantom": "0.2.5"
+	"node-phantom": "0.2.5",
+	"weak": "0.4.1"
   }
 }
