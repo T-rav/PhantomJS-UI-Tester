@@ -39,6 +39,13 @@ if (system.args.length < 3 || system.args.length > 5) {
 	page.onResourceRequested = function (request) {
 		console.log('Request ' + JSON.stringify(request, undefined, 4));
 	};
+	
+	page.onError = function (msg, trace) {
+		console.log(msg);
+		trace.forEach(function(item) {
+			console.log('  ', item.file, ':', item.line);
+		});
+	};
 		
     page.open(address, function (status) {
         if (status !== 'success') {
