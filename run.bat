@@ -1,0 +1,3 @@
+phantomjs rasterize.js "http://localhost:65368/index.html#/?searchString=peter&page=1&docTypes=Civil.Person,Civil.Organisation,Oss.Establishment" standard.png
+REM phantomjs rasterize.js "http://localhost:65368/index.html#/?searchString=peter&page=1&docTypes=Civil.Person,Civil.Organisation,Oss.Establishment" standard.png
+REM phantomjs rasterize.js "http://localhost:65368/#/search/fullscreenresult?domainId=8&index=civil&documentType=Person" fullscreen.png
