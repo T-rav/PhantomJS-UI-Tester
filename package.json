@@ -1,0 +1,14 @@
+{
+  "name": "PhantomJS-UITester",
+  "version": "0.0.1",
+  "description": "A tool to capture screenshots and find UI differences",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "webpage": "0.3.0",
+	"phantom": "0.7.2",
+	"node-phantom": "0.2.5"
+  }
+}
