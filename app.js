@@ -3,7 +3,10 @@
 // PhantomJS required
 // http://stackoverflow.com/questions/14278417/cannot-install-node-modules-that-require-compilation-on-windows-7-x64-vs2012
 // npm config set msvs_version 2013 --global
+// OR
 // npm install weak npm config set msvs_version 2013 --global
+// OR
+// npm install -g node-gyp -msvs_version=2013 && npm install -g restify
 var phantom = require('phantom');
 
 phantom.create(function (ph) {
