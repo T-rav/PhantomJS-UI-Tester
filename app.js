@@ -15,20 +15,20 @@ REM 2 - Compare current (V1) to new (V2)
 REM 3 - Create HTML with V1 + V2 + Differences if present, else OK image
 REM 4 - Email the HTML file
 */
-
+var fs = require('fs');
 var phantom = require('phantom');
 
-phantom.create(function (ph) {
-  ph.createPage(function (page) {
-    page.open("http://www.github.com", function (status) {
-		page.render('github.png');
-		ph.exit();
-    });
-  });
-});
+renderAndSave("http://www.github.com","github.png");
 
-/*var page = require('webpage').create();
-page.open('http://github.com/', function() {
-  page.render('github.png');
-  phantom.exit();
-});*/
+// ----- HELPERS -----
+function renderAndSave(url, imageName){
+	
+	phantom.create(function (ph) {
+	  ph.createPage(function (page) {
+		page.open(url, function (status) {
+			page.render(imageName);
+			ph.exit();
+		});
+	  });
+	});
+}
