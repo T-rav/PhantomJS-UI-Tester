@@ -6,3 +6,4 @@ Thumbs.db
 node_modules
 !**/nodeApps/node_modules/
 
+images/localhost-test-diff.png
