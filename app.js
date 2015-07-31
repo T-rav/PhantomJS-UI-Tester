@@ -12,7 +12,7 @@
 /*
 TODO:
 REM 1 - Take screenshots that are required according to csv file -- DONE
-REM 2 - Compare current (V1) to new (V2)
+REM 2 - Compare current (V1) to new (V2) -- DONE
 REM 3 - Create HTML with V1 + V2 + Differences if present, else OK image
 REM 4 - Email the HTML file
 REM 5 - Allow user to place v2 as new v1 - NICE TO HAVE :)
