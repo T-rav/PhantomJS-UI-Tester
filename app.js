@@ -24,31 +24,21 @@ var resemble = require('node-resemble'); // or drop the -js
 var imageDir = "images/";
 var csvFile = "urls.csv";
 
-/*
-resemble.outputSettings({
-  errorColor: {
-    red: 255,
-    green: 0,
-    blue: 255
-  },
-  errorType: 'movement',
-  transparency: 0.3,
-  largeImageThreshold: 1200
-});
-*/
-
 var parser = csv.parse({delimiter: ','},function(err, data){
 	for(var i = 0; i < data.length; i++){
 		var url = data[i][0];
-		var imageName = imageDir + data[i][1];
+    var imageBase = imageDir + data[i][1];
+		var imageName = imageBase + ".png";
+    var compareImage = imageBase+"-base.png";
 		renderAndSave(url, imageName);
+    diffScreenshots(compareImage, imageName, imageBase+"-diff.png");
 	}
 });
 
 fs.createReadStream(csvFile).pipe(parser);
 
 // do the diffing 
-diffScreenshots(imageDir+"localhost-v1.png",imageDir+"localhost-v2.png", imageDir+"diff.png");
+//diffScreenshots(imageDir+"localhost-v1.png",imageDir+"localhost-v2.png", imageDir+"diff.png");
 
 // ------ HELPERS ------
 function renderAndSave(url, imageName){
@@ -66,17 +56,23 @@ function renderAndSave(url, imageName){
 
 // standard version
 function diffScreenshots(image1, image2, diffImage){
+  
+  console.log(image1 + " - " + image2);
+  
   resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
     
-    //console.log(data);
-    var png = data.getImageDataUrl();
-    var writePng = png.replace(/^data:image\/png;base64,/, "");
-    
-    fs.writeFile(diffImage, writePng, "base64", function (err) {
-      if (err) {
-        throw 'error writing file [ ' + diffImage + ' ] error [ ' + err + ' ]';
-      }
-    });
-    
+    if(data.misMatchPercentage > 0){
+        console.log(data);
+        var png = data.getImageDataUrl();
+        var writePng = png.replace(/^data:image\/png;base64,/, "");
+        
+        fs.writeFile(diffImage, writePng, "base64", function (err) {
+          if (err) {
+            throw 'error writing file [ ' + diffImage + ' ] error [ ' + err + ' ]';
+          }
+        });   
+    }else{
+        console.log("NO DIFF!!!!"); 
+    }
   });
 }
