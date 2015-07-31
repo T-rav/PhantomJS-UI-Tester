@@ -7,22 +7,53 @@
 // npm install weak npm config set msvs_version 2013 --global
 // OR
 // npm install -g node-gyp -msvs_version=2013 && npm install -g restify
+// GTK : http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip -- MUST BE VERSION 2!!!
 
 /*
 TODO:
-REM 1 - Take screenshots are required
+REM 1 - Take screenshots that are required according to csv file -- DONE
 REM 2 - Compare current (V1) to new (V2)
 REM 3 - Create HTML with V1 + V2 + Differences if present, else OK image
 REM 4 - Email the HTML file
+REM 5 - Allow user to place v2 as new v1 - NICE TO HAVE :)
 */
 var fs = require('fs');
-var phantom = require('phantom');
+var csv = require('csv');
+var resemble = require('node-resemble'); // or drop the -js 
 
-renderAndSave("http://www.github.com","github.png");
+var imageDir = "images/";
+var csvFile = "urls.csv";
 
-// ----- HELPERS -----
+/*
+resemble.outputSettings({
+  errorColor: {
+    red: 255,
+    green: 0,
+    blue: 255
+  },
+  errorType: 'movement',
+  transparency: 0.3,
+  largeImageThreshold: 1200
+});
+*/
+
+var parser = csv.parse({delimiter: ','},function(err, data){
+	for(var i = 0; i < data.length; i++){
+		var url = data[i][0];
+		var imageName = imageDir + data[i][1];
+		renderAndSave(url, imageName);
+	}
+});
+
+fs.createReadStream(csvFile).pipe(parser);
+
+// do the diffing 
+diffScreenshots(imageDir+"localhost-v1.png",imageDir+"localhost-v2.png", imageDir+"diff.png");
+
+// ------ HELPERS ------
 function renderAndSave(url, imageName){
-	
+	var phantom = require('phantom');
+
 	phantom.create(function (ph) {
 	  ph.createPage(function (page) {
 		page.open(url, function (status) {
@@ -31,4 +62,21 @@ function renderAndSave(url, imageName){
 		});
 	  });
 	});
+}
+
+// standard version
+function diffScreenshots(image1, image2, diffImage){
+  resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
+    
+    //console.log(data);
+    var png = data.getImageDataUrl();
+    var writePng = png.replace(/^data:image\/png;base64,/, "");
+    
+    fs.writeFile(diffImage, writePng, "base64", function (err) {
+      if (err) {
+        throw 'error writing file [ ' + diffImage + ' ] error [ ' + err + ' ]';
+      }
+    });
+    
+  });
 }
