@@ -19,6 +19,7 @@ REM 5 - Allow user to place v2 as new v1 - NICE TO HAVE :)
 */
 var fs = require('fs');
 var csv = require('csv');
+var colors = require('colors');
 var resemble = require('node-resemble'); // or drop the -js 
 
 var imageDir = "images/";
@@ -31,7 +32,7 @@ var parser = csv.parse({delimiter: ','},function(err, data){
 		var imageName = imageBase + ".png";
     var compareImage = imageBase+"-base.png";
 		renderAndSave(url, imageName);
-    diffScreenshots(compareImage, imageName, imageBase+"-diff.png");
+    diffScreenshots(url, compareImage, imageName, imageBase+"-diff.png");
 	}
 });
 
@@ -51,11 +52,12 @@ function renderAndSave(url, imageName){
 	});
 }
 
-function diffScreenshots(image1, image2, diffImage){
+function diffScreenshots(url, image1, image2, diffImage){
 
   resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
     
     if(data.misMatchPercentage > 0.0){
+        console.log("BOO, DIFF FOR [ ".red + url +" ]".red); 
         var png = data.getImageDataUrl();
         var writePng = png.replace(/^data:image\/png;base64,/, "");
         
@@ -65,7 +67,7 @@ function diffScreenshots(image1, image2, diffImage){
           }
         });   
     }else{
-        console.log("AWESOME, NO DIFF!!!!"); 
+        console.log("NO DIFF FOR [ ".green + url +" ]".green); 
     }
   });
 }
