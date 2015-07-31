@@ -37,32 +37,25 @@ var parser = csv.parse({delimiter: ','},function(err, data){
 
 fs.createReadStream(csvFile).pipe(parser);
 
-// do the diffing 
-//diffScreenshots(imageDir+"localhost-v1.png",imageDir+"localhost-v2.png", imageDir+"diff.png");
-
 // ------ HELPERS ------
 function renderAndSave(url, imageName){
 	var phantom = require('phantom');
 
 	phantom.create(function (ph) {
 	  ph.createPage(function (page) {
-		page.open(url, function (status) {
-			page.render(imageName);
-			ph.exit();
-		});
+  		page.open(url, function (status) {
+  			page.render(imageName);
+  			ph.exit();
+  		});
 	  });
 	});
 }
 
-// standard version
 function diffScreenshots(image1, image2, diffImage){
-  
-  console.log(image1 + " - " + image2);
-  
+
   resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
     
-    if(data.misMatchPercentage > 0){
-        console.log(data);
+    if(data.misMatchPercentage > 0.0){
         var png = data.getImageDataUrl();
         var writePng = png.replace(/^data:image\/png;base64,/, "");
         
@@ -72,7 +65,7 @@ function diffScreenshots(image1, image2, diffImage){
           }
         });   
     }else{
-        console.log("NO DIFF!!!!"); 
+        console.log("AWESOME, NO DIFF!!!!"); 
     }
   });
 }
