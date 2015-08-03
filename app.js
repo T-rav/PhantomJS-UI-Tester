@@ -27,39 +27,55 @@ var csvFile = "urls.csv";
 
 var parser = csv.parse({delimiter: ','},function(err, data){
 	for(var i = 0; i < data.length; i++){
+		
 		var url = data[i][0];
+		
 		var imageBase = imageDir + data[i][1];
-		var imageName = imageBase + ".png";
+		var imagePath = imageBase + ".png";
 		var compareImage = imageBase+"-base.png";
-		renderAndSave(url, imageName);
-		diffScreenshots(url, compareImage, imageName, imageBase+"-diff.png");
+		var diffImage = imageBase+"-diff.png";
+
+		removeOldImages(imagePath);
+		renderAndSave(url, compareImage, imagePath, diffImage);
 	}
 });
 
 fs.createReadStream(csvFile).pipe(parser);
 
 // ------ HELPERS ------
-function renderAndSave(url, imageName){
-	
-	console.log("RENDER...");
-	
+function renderAndSave(url, compareImage, imagePath, diffImage){
+
 	var phantom = require('phantom');
 	phantom.create(function (ph) {
 	  ph.createPage(function (page) {
   		page.open(url, function (status) {
-  			page.render(imageName);
-  			ph.exit();
+  			page.render(imagePath);
+			ph.exit();
+			
+			// Time to complete saving image :)
+			setTimeout(function(){
+				diffScreenshots(url, compareImage, imagePath, diffImage);
+			}, 1500);
+			
   		});
 	  });
 	});
 }
 
+function removeOldImages(imagePath){
+	if(fs.existsSync(imagePath)){
+		fs.unlinkSync(imagePath);
+	}		
+}
+
 function diffScreenshots(url, image1, image2, diffImage){
 
+  if(!fs.existsSync(image1) || !fs.existsSync(image2)){
+	console.log(colors.red.underline("WHAT THE?!, UNABLE TO DIFF [ " + url +" ] DUE TO MISSING IMAGE DATA")); 
+  }
+  
   resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
-    
-	console.log("DIFF...");
-	
+
     if(data.misMatchPercentage > 0.0){
         console.log("BOO, DIFF FOR [ ".red + url +" ]".red); 
         var png = data.getImageDataUrl();
