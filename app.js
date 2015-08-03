@@ -20,12 +20,39 @@ REM 5 - Allow user to place v2 as new v1 - NICE TO HAVE :)
 var fs = require('fs');
 var csv = require('csv');
 var colors = require('colors');
-var resemble = require('node-resemble'); // or drop the -js 
+var resemble = require('node-resemble');
 
+var captured_text = "";
+var totalTest = 0;
 var imageDir = "images/";
 var csvFile = "urls.csv";
+ 
+var logTestData = function(url, currentImage, baseImage, difImage, status){
+	totalTest++;
+	
+	captured_text += "<tr><td valign='bottom'>"+totalTest+"</td><td valign='bottom'>"+url+"</td><td><a href='"+currentImage+"'><img height='150' width='150' src='"+currentImage+"'/></a></td><td><img height='150' width='150' src='"+baseImage+"'/>";
+	
+	var color = 'green';
+	if(status === 'FAIL'){
+		color = 'red';
+	}
+	
+	if(!difImage){
+		captured_text += "</td><td></td><td style='color:"+color+"' >"+status+"</td></tr>";
+	}else{
+		captured_text += "</td><td><img height='150' width='150' src='"+difImage+"'/></td><td style='color:"+color+"' >"+status+"</td></tr>";
+	}
+	
+};
 
-var parser = csv.parse({delimiter: ','},function(err, data){
+process.on('exit', function() {
+    console.log('Received Signal');
+	var htmlHeader = "<html><body><table cellspacing='3'><tr><th>#</th><th>URL</th><th>CURRENT IMAGE</th><th>BASE IMAGE</th><th>IMAGE DIF</th><th>STATUS</th></tr>";
+	var htmlFooter = "</table></body></html>";
+	fs.writeFileSync('run.html', htmlHeader+captured_text+htmlFooter);
+});
+
+var parser = csv.parse({delimiter: ','}, function(err, data){
 	for(var i = 0; i < data.length; i++){
 		
 		var url = data[i][0];
@@ -71,23 +98,28 @@ function removeOldImages(imagePath){
 function diffScreenshots(url, image1, image2, diffImage){
 
   if(!fs.existsSync(image1) || !fs.existsSync(image2)){
-	console.log(colors.red.underline("WHAT THE?!, UNABLE TO DIFF [ " + url +" ] DUE TO MISSING IMAGE DATA")); 
+	console.log(colors.red("WHAT THE?!, UNABLE TO DIFF [ " + url +" ] DUE TO MISSING IMAGE DATA"));
+	logTestData(url, image1, image2, diffImage, "UNABLE TO DIFF - MISSING IMAGE");
   }
   
   resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
 
     if(data.misMatchPercentage > 0.0){
-        console.log("BOO, DIFF FOR [ ".red + url +" ]".red); 
+        console.log(colors.red("BOO, DIFF FOR [ " + url +" ]"));
+		logTestData(url, image1, image2, diffImage, "FAIL");
+		
         var png = data.getImageDataUrl();
         var writePng = png.replace(/^data:image\/png;base64,/, "");
         
         fs.writeFile(diffImage, writePng, "base64", function (err) {
           if (err) {
-            throw 'error writing file [ ' + diffImage + ' ] error [ ' + err + ' ]';
+            console.log(colors.red('error writing file [ ' + diffImage + ' ] error [ ' + err + ' ]'));
+			logTestData(url, image1, image2, diffImage, "UNABLE TO DIFF - ERROR [ " + err + " ]");
           }
         });   
     }else{
-        console.log("NO DIFF FOR [ ".green + url +" ]".green); 
+        console.log(colors.green("NO DIFF FOR [ ".green + url +" ]".green)); 
+		logTestData(url, image1, image2, null, "PASS");
     }
   });
 }
