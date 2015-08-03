@@ -28,11 +28,11 @@ var csvFile = "urls.csv";
 var parser = csv.parse({delimiter: ','},function(err, data){
 	for(var i = 0; i < data.length; i++){
 		var url = data[i][0];
-    var imageBase = imageDir + data[i][1];
+		var imageBase = imageDir + data[i][1];
 		var imageName = imageBase + ".png";
-    var compareImage = imageBase+"-base.png";
+		var compareImage = imageBase+"-base.png";
 		renderAndSave(url, imageName);
-    diffScreenshots(url, compareImage, imageName, imageBase+"-diff.png");
+		diffScreenshots(url, compareImage, imageName, imageBase+"-diff.png");
 	}
 });
 
@@ -40,8 +40,10 @@ fs.createReadStream(csvFile).pipe(parser);
 
 // ------ HELPERS ------
 function renderAndSave(url, imageName){
+	
+	console.log("RENDER...");
+	
 	var phantom = require('phantom');
-
 	phantom.create(function (ph) {
 	  ph.createPage(function (page) {
   		page.open(url, function (status) {
@@ -56,6 +58,8 @@ function diffScreenshots(url, image1, image2, diffImage){
 
   resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
     
+	console.log("DIFF...");
+	
     if(data.misMatchPercentage > 0.0){
         console.log("BOO, DIFF FOR [ ".red + url +" ]".red); 
         var png = data.getImageDataUrl();
