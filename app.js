@@ -30,7 +30,8 @@ var csvFile = "urls.csv";
 var logTestData = function(url, currentImage, baseImage, difImage, status){
 	totalTest++;
 	
-	captured_text += "<tr><td valign='bottom'>"+totalTest+"</td><td valign='bottom'>"+url+"</td><td><a href='"+currentImage+"'><img height='150' width='150' src='"+currentImage+"'/></a></td><td><img height='150' width='150' src='"+baseImage+"'/>";
+	captured_text += "<tr><td valign='bottom'>"+totalTest+"</td><td valign='bottom'>"+url+"</td><td><a href='"+currentImage+"'><img height='150' width='150' src='"+currentImage+"'/></a></td>";
+	captured_text += "<td><a href='"+baseImage+"'><img height='150' width='150' src='"+baseImage+"'/></a>";
 	
 	var color = 'green';
 	if(status === 'FAIL'){
@@ -43,7 +44,7 @@ var logTestData = function(url, currentImage, baseImage, difImage, status){
 	if(!difImage){
 		captured_text += "</td><td></td><td style='color:"+color+"' >"+status+"</td></tr>";
 	}else{
-		captured_text += "</td><td><img height='150' width='150' src='"+difImage+"'/></td><td style='color:"+color+"' >"+status+"</td></tr>";
+		captured_text += "</td><td><a href='"+difImage+"'><img height='150' width='150' src='"+difImage+"'/></a></td><td style='color:"+color+"' >"+status+"</td></tr>";
 	}
 	
 };
@@ -56,7 +57,7 @@ process.on('exit', function() {
 		runStatus = "PASSED TEST RUN";
 	}
 	
-	var htmlHeader = "<html><body><table cellspacing='3'><tr><th>#</th><th>URL</th><th>CURRENT IMAGE</th><th>BASE IMAGE</th><th>IMAGE DIF</th><th>STATUS</th></tr>";
+	var htmlHeader = "<html><body bgcolor='#eee'><table cellspacing='3'><tr><th>#</th><th>URL</th><th>CURRENT IMAGE</th><th>BASE IMAGE</th><th>IMAGE DIF</th><th>STATUS</th></tr>";
 	var htmlFooter = "</table><br/><br/><br/>";
 	htmlFooter +="<table><tr><th>Total Test</th><th>Passed</th><th>Failed</th><th>Run Status</th></tr><tr><td>"+totalTest+"</td><td>"+passedTest+"</td><td>"+failedTest+"</td><td>"+runStatus+"</tr></table></body></html>";
 	
