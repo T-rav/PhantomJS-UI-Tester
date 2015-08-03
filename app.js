@@ -23,7 +23,7 @@ var colors = require('colors');
 var resemble = require('node-resemble');
 
 var captured_text = "";
-var totalTest = 0;
+var totalTest = 0, failedTest = 0, passedTest = 0;
 var imageDir = "images/";
 var csvFile = "urls.csv";
  
@@ -35,6 +35,9 @@ var logTestData = function(url, currentImage, baseImage, difImage, status){
 	var color = 'green';
 	if(status === 'FAIL'){
 		color = 'red';
+		failedTest++;
+	}else{
+		passedTest++;
 	}
 	
 	if(!difImage){
@@ -47,8 +50,16 @@ var logTestData = function(url, currentImage, baseImage, difImage, status){
 
 process.on('exit', function() {
     console.log('Received Signal');
+	
+	var runStatus = "FAILED TEST RUN";
+	if(failedTest === 0){
+		runStatus = "PASSED TEST RUN";
+	}
+	
 	var htmlHeader = "<html><body><table cellspacing='3'><tr><th>#</th><th>URL</th><th>CURRENT IMAGE</th><th>BASE IMAGE</th><th>IMAGE DIF</th><th>STATUS</th></tr>";
-	var htmlFooter = "</table></body></html>";
+	var htmlFooter = "</table><br/><br/><br/>";
+	htmlFooter +="<table><tr><th>Total Test</th><th>Passed</th><th>Failed</th><th>Run Status</th></tr><tr><td>"+totalTest+"</td><td>"+passedTest+"</td><td>"+failedTest+"</td><td>"+runStatus+"</tr></table></body></html>";
+	
 	fs.writeFileSync('run.html', htmlHeader+captured_text+htmlFooter);
 });
 
