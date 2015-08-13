@@ -27,10 +27,10 @@ var totalTest = 0, failedTest = 0, passedTest = 0;
 var imageDir = "images/";
 var csvFile = "urls.csv";
  
-var logTestData = function(url, currentImage, baseImage, difImage, status){
+var logTestData = function(url, currentImage, baseImage, difImage, status, testCase){
 	totalTest++;
 	
-	captured_text += "<tr><td valign='bottom'>"+totalTest+"</td><td valign='bottom'>"+url+"</td><td><a href='"+currentImage+"'><img height='150' width='150' src='"+currentImage+"'/></a></td>";
+	captured_text += "<tr><td valign='bottom' style='font-style:italic'>"+testCase+"</td><td valign='bottom'>"+url+"</td><td><a href='"+currentImage+"'><img height='150' width='150' src='"+currentImage+"'/></a></td>";
 	captured_text += "<td><a href='"+baseImage+"'><img height='150' width='150' src='"+baseImage+"'/></a>";
 	
 	var color = 'green';
@@ -52,16 +52,28 @@ var logTestData = function(url, currentImage, baseImage, difImage, status){
 process.on('exit', function() {
     console.log('Received Signal');
 	
+	var testPackageName = "Demo App";
+	var currentdate = new Date(); 
+	var testRunTS = "Test Run: " + currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+	
 	var runStatus = "FAILED TEST RUN";
 	if(failedTest === 0){
 		runStatus = "PASSED TEST RUN";
 	}
 	
-	var htmlHeader = "<html><body bgcolor='#eee'><table cellspacing='3'><tr><th>#</th><th>URL</th><th>CURRENT IMAGE</th><th>BASE IMAGE</th><th>IMAGE DIF</th><th>STATUS</th></tr>";
-	var htmlFooter = "</table><br/><br/><br/>";
-	htmlFooter +="<table><tr><th>Total Test</th><th>Passed</th><th>Failed</th><th>Run Status</th></tr><tr><td>"+totalTest+"</td><td>"+passedTest+"</td><td>"+failedTest+"</td><td>"+runStatus+"</tr></table></body></html>";
+	var htmlHeader = "<html><style> table {border-collapse: collapse;} table, th, td { border: 1px solid black; } th { background-color: #778899; color: white; } td { padding: 5px; background-color: #FFF5EE; } </style> ";
+	htmlHeader += "<body bgcolor='#fff'> <b>Layout Test Case Executor (LTCE) </b> <br/> <br/> Test Report For <u>" + testPackageName + "</u> <br/> <br/> " + testRunTS + "</br>";
 	
-	fs.writeFileSync('run.html', htmlHeader+captured_text+htmlFooter);
+	var htmlResultsTable = "<table><tr><th>Total Test</th><th>Passed</th><th>Failed</th><th>Run Status</th></tr><tr><td>"+totalTest+"</td><td>"+passedTest+"</td><td>"+failedTest+"</td><td>"+runStatus+"</tr></table><br/><br/>";
+	var htmlReportHeader = "Test Cases <br/><table><tr><th>Test Case</th><th>URL</th><th>Current Image</th><th>Base Image</th><th>Image Dif</th><th>Status</th></tr>";
+	var htmlFooter = "</table></body></html>";
+	
+	fs.writeFileSync('run.html', htmlHeader+htmlResultsTable+htmlReportHeader+captured_text+htmlFooter);
 });
 
 var parser = csv.parse({delimiter: ','}, function(err, data){
@@ -69,20 +81,21 @@ var parser = csv.parse({delimiter: ','}, function(err, data){
 		
 		var url = data[i][0];
 		
+		var testCase = data[i][1];
 		var imageBase = imageDir + data[i][1];
 		var imagePath = imageBase + ".png";
 		var compareImage = imageBase+"-base.png";
 		var diffImage = imageBase+"-diff.png";
 
 		removeOldImages(imagePath);
-		renderAndSave(url, compareImage, imagePath, diffImage);
+		renderAndSave(url, compareImage, imagePath, diffImage, testCase);
 	}
 });
 
 fs.createReadStream(csvFile).pipe(parser);
 
 // ------ HELPERS ------
-function renderAndSave(url, compareImage, imagePath, diffImage){
+function renderAndSave(url, compareImage, imagePath, diffImage, testCase){
 
 	var phantom = require('phantom');
 	phantom.create(function (ph) {
@@ -93,7 +106,7 @@ function renderAndSave(url, compareImage, imagePath, diffImage){
 			
 			// Time to complete saving image :)
 			setTimeout(function(){
-				diffScreenshots(url, compareImage, imagePath, diffImage);
+				diffScreenshots(url, compareImage, imagePath, diffImage, testCase);
 			}, 1500);
 			
   		});
@@ -107,18 +120,18 @@ function removeOldImages(imagePath){
 	}		
 }
 
-function diffScreenshots(url, image1, image2, diffImage){
+function diffScreenshots(url, image1, image2, diffImage, testCase){
 
   if(!fs.existsSync(image1) || !fs.existsSync(image2)){
 	console.log(colors.red("WHAT THE?!, UNABLE TO DIFF [ " + url +" ] DUE TO MISSING IMAGE DATA"));
-	logTestData(url, image1, image2, diffImage, "UNABLE TO DIFF - MISSING IMAGE");
+	logTestData(url, image1, image2, diffImage, "UNABLE TO DIFF - MISSING IMAGE", testCase);
   }
   
   resemble(image1).compareTo(image2).ignoreColors().onComplete(function(data){
 
     if(data.misMatchPercentage > 0.0){
-        console.log(colors.red("BOO, DIFF FOR [ " + url +" ]"));
-		logTestData(url, image1, image2, diffImage, "FAIL");
+        console.log(colors.red("BOO, DIFF FOR [ " + url +" AS " + testCase + " ]"));
+		logTestData(url, image1, image2, diffImage, "FAIL", testCase);
 		
         var png = data.getImageDataUrl();
         var writePng = png.replace(/^data:image\/png;base64,/, "");
@@ -126,12 +139,12 @@ function diffScreenshots(url, image1, image2, diffImage){
         fs.writeFile(diffImage, writePng, "base64", function (err) {
           if (err) {
             console.log(colors.red('error writing file [ ' + diffImage + ' ] error [ ' + err + ' ]'));
-			logTestData(url, image1, image2, diffImage, "UNABLE TO DIFF - ERROR [ " + err + " ]");
+			logTestData(url, image1, image2, diffImage, "UNABLE TO DIFF - ERROR [ " + err + " ]", testCase);
           }
         });   
     }else{
-        console.log(colors.green("NO DIFF FOR [ ".green + url +" ]".green)); 
-		logTestData(url, image1, image2, null, "PASS");
+        console.log(colors.green("NO DIFF FOR [ " + url + " AS " + testCase + " ]")); 
+		logTestData(url, image1, image2, null, "PASS", testCase);
     }
   });
 }
