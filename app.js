@@ -82,7 +82,7 @@ process.on('exit', function() {
 	fs.writeFileSync('run.html', htmlHeader+htmlResultsTable+htmlReportHeader+captured_text+htmlFooter);
 });
 
-var parser = csv.parse({delimiter: ','}, function(err, data){
+var parser = csv.parse({delimiter: '|'}, function(err, data){
 	for(var i = 0; i < data.length; i++){
 		
 		var url = data[i][0];
