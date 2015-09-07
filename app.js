@@ -1,10 +1,11 @@
 // Manual Installs
 // Python 2.7 required
 // PhantomJS required
+// npm install  --msvs_version=2010 # Seems to work perfect with 2010 install
 // http://stackoverflow.com/questions/14278417/cannot-install-node-modules-that-require-compilation-on-windows-7-x64-vs2012
-// npm config set msvs_version 2013 --global
+// npm config set msvs_version 2012 --global
 // OR
-// npm install weak npm config set msvs_version 2013 --global
+// npm install weak npm config set msvs_version 2012 --global
 // OR
 // npm install -g node-gyp -msvs_version=2013 && npm install -g restify
 // GTK : http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip -- MUST BE VERSION 2!!!
