@@ -1,6 +1,12 @@
 // Manual Installs
 // Python 2.7 required
-// PhantomJS required
+// PhantomJS required - Ensure it is on PATH
+// GTK2 required: http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip to C:\GTK
+// GTK - Add to C:\GTK to PATH
+// Any Cairo Issue : https://github.com/Automattic/node-canvas/issues/225, http://cairographics.org/download/
+// npm install
+
+
 // npm install  --msvs_version=2010 # Seems to work perfect with 2010 install
 // http://stackoverflow.com/questions/14278417/cannot-install-node-modules-that-require-compilation-on-windows-7-x64-vs2012
 // npm config set msvs_version 2012 --global
