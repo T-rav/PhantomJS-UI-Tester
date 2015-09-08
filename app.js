@@ -3,41 +3,42 @@
 // PhantomJS required - Ensure it is on PATH
 // GTK2 required: http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip to C:\GTK
 // GTK - Add to C:\GTK to PATH
-// Any Cairo Issue : https://github.com/Automattic/node-canvas/issues/225, http://cairographics.org/download/
+// NOTE: Any Cairo Issue : https://github.com/Automattic/node-canvas/issues/225, http://cairographics.org/download/
 // npm install
 
+// Win2012 Server Issues
+// Cmd.exe to set WinSDK https://gist.github.com/kosmobot/6020327
+// 	-> call "C:\Program Files\Microsoft SDKs\Windows\v7.0\bin\Setenv.cmd" /Release /x64
 
-// npm install  --msvs_version=2010 # Seems to work perfect with 2010 install
-// http://stackoverflow.com/questions/14278417/cannot-install-node-modules-that-require-compilation-on-windows-7-x64-vs2012
-// npm config set msvs_version 2012 --global
-// OR
-// npm install weak npm config set msvs_version 2012 --global
-// OR
-// npm install -g node-gyp -msvs_version=2013 && npm install -g restify
-// GTK : http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip -- MUST BE VERSION 2!!!
+// The next steps are uncertian, as the VC++ 2010 SP1 was already install as per step a and wanted to repair the install, I then tried option b.
 
-/*
-TODO:
-REM 1 - Take screenshots that are required according to csv file -- DONE
-REM 2 - Compare current (V1) to new (V2) -- DONE
-REM 3 - Create HTML with V1 + V2 + Differences if present, else OK image
-REM 4 - Email the HTML file
-REM 5 - Allow user to place v2 as new v1 - NICE TO HAVE :)
-*/
+// a)
+// Then goto : http://wishmesh.com/2011/04/fatal-error-c1083-cannot-open-include-file-ammintrin-h-no-such-file-or-directory/
+//  -> VC++ 2010 SP1, update fixes broken missing .h files, Can I just say I flipping hate winblows machines!!
+
+// b)
+// OR goto : http://www.microsoft.com/en-us/download/confirmation.aspx?id=4422
+//  -> Fetch VC++ 2010 SP1 Windows SDK 7.1
+
 var fs = require('fs');
 var csv = require('csv');
 var colors = require('colors');
 var resemble = require('node-resemble');
+var fs = require('fs');
+var open = require('open');
 
 var captured_text = "";
 var totalTest = 0, failedTest = 0, passedTest = 0;
 var imageDir = "images/";
 var csvFile = "urls.csv";
  
+var settingsFile = "settings.json";
+var settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+  
 var logTestData = function(url, currentImage, baseImage, difImage, status, testCase){
 	totalTest++;
 	
-	captured_text += "<tr><td valign='bottom' style='font-style:italic'>"+testCase+"</td><td valign='bottom'>"+url+"</td><td><a href='"+currentImage+"'><img height='150' width='150' src='"+currentImage+"'/></a></td>";
+	captured_text += "<tr><td valign='bottom' style='font-style:italic'>"+testCase+"</td><td valign='bottom'><a href=\""+ url +"\">"+trimString(url)+"...</a>"+"</td><td><a href='"+currentImage+"'><img height='150' width='150' src='"+currentImage+"'/></a></td>";
 	captured_text += "<td><a href='"+baseImage+"'><img height='150' width='150' src='"+baseImage+"'/></a>";
 	
 	var color = 'green';
@@ -56,9 +57,19 @@ var logTestData = function(url, currentImage, baseImage, difImage, status, testC
 	
 };
 
+var trimString = function(str){
+
+	var max = 100;
+	if(str.length >= max){
+		return str.substring(0,max) + "...";
+	}
+	
+	return str;
+};
+
 process.on('exit', function() {
 
-	var testPackageName = "Demo App";
+	var testPackageName = settings.AppName;
 	var currentdate = new Date(); 
 	var testRunTS = "Test Run: " + currentdate.getDate() + "/"
                 + (currentdate.getMonth()+1)  + "/" 
@@ -67,8 +78,12 @@ process.on('exit', function() {
                 + currentdate.getMinutes() + ":" 
                 + currentdate.getSeconds();
 				
-	var percentPassed = (passedTest-failedTest) / ((passedTest + failedTest) / 2) * 100;
+	var percentPassed = 100;
 	
+	if(failedTest > 0){
+		percentPassed = (passedTest-failedTest) / ((passedTest + failedTest) / 2) * 100;
+	}
+
 	if(percentPassed < 0){
 		percentPassed = 100 + percentPassed;
 	}
@@ -86,7 +101,7 @@ process.on('exit', function() {
 	var htmlReportHeader = "Test Cases <br/><table><tr><th>Test Case</th><th>URL</th><th>Current Image</th><th>Base Image</th><th>Image Dif</th><th>Status</th></tr>";
 	var htmlFooter = "</table></body></html>";
 	
-	fs.writeFileSync('run.html', htmlHeader+htmlResultsTable+htmlReportHeader+captured_text+htmlFooter);
+	fs.writeFileSync(settings.ResultFileName, htmlHeader+htmlResultsTable+htmlReportHeader+captured_text+htmlFooter);
 });
 
 var parser = csv.parse({delimiter: '|'}, function(err, data){
@@ -105,23 +120,33 @@ var parser = csv.parse({delimiter: '|'}, function(err, data){
 	}
 });
 
+// START : read the csvFile and do stuff ;)
 fs.createReadStream(csvFile).pipe(parser);
 
 // ------ HELPERS ------
 function renderAndSave(url, compareImage, imagePath, diffImage, testCase){
 
+	var renderWait = settings.RenderWait;
+	var diffWait = settings.DiffWait;
 	var phantom = require('phantom');
 	phantom.create(function (ph) {
 	  ph.createPage(function (page) {
-  		page.open(url, function (status) {
-  			page.render(imagePath);
-			ph.exit();
+		
+		page.set('viewportSize', {width:settings.RenderWidth,height:settings.RenderHeight});
+		
+		page.open(url, function (status) {
+		   
+		    setTimeout(function(){
+				page.render(imagePath);
+				ph.exit();
+				
+				// Time to complete saving image :)
+				setTimeout(function(){
+					diffScreenshots(url, compareImage, imagePath, diffImage, testCase);
+				}, diffWait);
 			
-			// Time to complete saving image :)
-			setTimeout(function(){
-				diffScreenshots(url, compareImage, imagePath, diffImage, testCase);
-			}, 1500);
-			
+			}, renderWait);
+  			
   		});
 	  });
 	});
@@ -136,7 +161,7 @@ function removeOldImages(imagePath){
 function diffScreenshots(url, image1, image2, diffImage, testCase){
 
   if(!fs.existsSync(image1) || !fs.existsSync(image2)){
-	console.log(colors.red("WHAT THE?!, UNABLE TO DIFF [ " + url +" ] DUE TO MISSING IMAGE DATA"));
+	console.log(colors.red("WHAT THE! - UNABLE TO DIFF [ " + url +" ] DUE TO MISSING IMAGE DATA"));
 	logTestData(url, image1, image2, diffImage, "UNABLE TO DIFF - MISSING IMAGE", testCase);
   }
   

@@ -1,3 +1,3 @@
 http://jenkins:9090/#/?searchString=peter&page=1&docTypes=Civil.Person,Civil.Foundling,Civil.Marriage,Civil.Birth,Civil.Divorce,Civil.DGCSBlacklist,Civil.Death,Civil.ChildCareCentre,Civil.LabourCard,Civil.PersonPassport,Civil.Passport,Civil.Organisation,Civil.Visa,Civil.PersonNameChange,Civil.PersonCivilNumberChange,Civil.IDCard,Civil.Card,Civil.PersonVisa,Civil.PersonAddressChange,Civil.Relationship,Oss.AuthorizedSignatory,Oss.BusinessActivity,Oss.Establishment,Oss.EstablishmentBranch,Oss.Investment,Oss.Person,Mpower.Card,Mpower.CardIssue,Mpower.CardDeparture,Mpower.Sponsor,Mpower.Vehicle|3_column_search
 http://jenkins:9090/#/search/fullscreenresult?domainId=8&index=civil&documentType=Person|full_view
-http://jenkins:9090/#/search/graphVisualisation?domainId=8&index=civil&documentType=Person,graph_view
+http://jenkins:9090/#/search/graphVisualisation?domainId=8&index=civil&documentType=Person|graph_view
