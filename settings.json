@@ -2,7 +2,7 @@
 	"AppName" : "Bearpaw",
 	"RenderWidth" : "1920",
 	"RenderHeight" : "1080",
-	"RenderWait" : 10000,
+	"RenderWait" : 15000,
 	"DiffWait" : 1500,
 	"ResultFileName" : "run.html"
 }
