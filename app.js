@@ -84,9 +84,6 @@ process.on('exit', function() {
 		percentPassed = (passedTest-failedTest) / ((passedTest + failedTest) / 2) * 100;
 	}
 
-	if(percentPassed < 0){
-		percentPassed = 100 + percentPassed;
-	}
 	
 	var runStatus = "FAILED TEST RUN";
 	if(failedTest === 0){
