@@ -93,9 +93,9 @@ process.on('exit', function() {
 	var htmlHeader = "<html><style> table {border-collapse: collapse;} table, th, td { border: 1px solid black; } th { background-color: #778899; color: white; } td { padding: 5px; background-color: #FFF5EE; } </style> ";
 	htmlHeader += "<body bgcolor='#fff'> <b>Layout Test Case Executor (LTCE) </b> <br/> <br/> Test Report For <u>" + testPackageName + "</u> <br/> <br/> " + testRunTS + "</br>";
 	
-	var htmlResultsTable = "<table><tr><th>Total Test</th><th>Passed</th><th>Failed</th><th>Percentage Success</th><th>Run Status</th></tr>";
-	htmlResultsTable += "<tr><td>"+totalTest+"</td><td>"+passedTest+"</td><td>"+failedTest+"</td><td>" + percentPassed.toFixed(2) + " % </td><td>"+runStatus+"</tr></table><br/><br/>";
-	var htmlReportHeader = "Test Cases <br/><table><tr><th>Test Case</th><th>URL</th><th>Current Image</th><th>Base Image</th><th>Image Dif</th><th>Status</th></tr>";
+	var htmlResultsTable = "<table><tr><th>Total Test</th><th>Passed</th><th>Failed</th><th>Run Status</th></tr>";
+	htmlResultsTable += "<tr><td>"+totalTest+"</td><td>"+passedTest+"</td><td>"+failedTest+"</td><td>"+runStatus+"</tr></table><br/><br/>";
+	var htmlReportHeader = "Test Cases <br/><table><tr><th>Test Case</th><th>URL</th><th>Base Image</th><th>Current Image</th><th>Image Dif</th><th>Status</th></tr>";
 	var htmlFooter = "</table></body></html>";
 	
 	fs.writeFileSync(settings.ResultFileName, htmlHeader+htmlResultsTable+htmlReportHeader+captured_text+htmlFooter);
